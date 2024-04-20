@@ -9,6 +9,8 @@ from random import choice, randint
 from string import ascii_lowercase
 from collections import Counter
 from heapq import nlargest
+from memory_profiler import memory_usage, profile
+
 def find_film_keywords(film_keywords: dict, film_name: str):
     '''
     Returns set of keywords used in film
@@ -94,8 +96,20 @@ def test_graph():
     plt.title('Comparison of Execution Time')
     plt.show()
 
+def memory_test(data):
+    @profile
+    def test_my():
+        find_films_with_keywords_original(data, 5)
+
+    @profile
+    def test_bot():
+        find_films_with_keywords_optimized(data, 5)
+
+    # Call the test functions
+    test_my()
+    test_bot()
 
 if __name__=="__main__":
-    # import doctest
-    # print(doctest.testmod())
+    data = generate_test_data(5, 5)
+    memory_test(data)
     test_graph()

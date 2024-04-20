@@ -7,7 +7,11 @@ import urllib.request
 import csv
 import time
 import matplotlib.pyplot as plt
-
+import os
+import psutil
+from memory_profiler import memory_usage, profile
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 def read_input_file(url: str, number: int) -> list[list[str]]:
     """
     Preconditions: 0 <= number <= 77
@@ -134,24 +138,19 @@ def write_csv_file_optimised(url: str):
         ls = read_input_file_optimised(url, 77)
         writer.writerows(ls)
 
-def test_functions():
-    start_time = time.time()
+def memory_test(data):
+    @profile
+    def test_read_my():
+        read_input_file(data, 3)
 
-    a = read_input_file('https://raw.githubusercontent.com/anrom7/Test_Olya/master/New%20folder/total.txt', 1)
-    write_csv_file(a)
+    @profile
+    def test_read_bot():
+        read_input_file_optimised(data, 3)
 
-    original_time = time.time() - start_time
-    start_time = time.time()
-
-    a = read_input_file_optimised('https://raw.githubusercontent.com/anrom7/Test_Olya/master/New%20folder/total.txt', 1)
-    write_csv_file_optimised(a)
-
-    optimized_time = time.time() - start_time
-    plt.bar(['Original', 'Optimized'], [original_time, optimized_time])
-    plt.ylabel('Execution Time (seconds)')
-    plt.show()
+    # Call the test functions
+    test_read_my()
+    test_read_bot()
 
 if __name__=="__main__":
-    test_functions()
-    # import doctest
-    # print(doctest.testmod())
+    data = "https://raw.githubusercontent.com/anrom7/Test_Olya/master/New%20folder/total.txt"
+    memory_test(data)

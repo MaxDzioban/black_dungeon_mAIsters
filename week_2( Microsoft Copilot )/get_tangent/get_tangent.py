@@ -1,8 +1,12 @@
 import timeit
 import matplotlib.pyplot as plt
+import psutil
+import os
+import random
+from memory_profiler import memory_usage
 
-# Your original function
 def get_tangent_orig(f: callable, x_0: int) -> str:
+    '''My get tangent'''
     output = []
     for i in range(324):
         output.append((f(x_0 + 10**-i) - f(x_0)) / (10**-i))
@@ -14,8 +18,8 @@ def get_tangent_orig(f: callable, x_0: int) -> str:
                 return f'{round(output[i], 2)} * x {str(b)[0]} {abs(b)}'
             return f'{round(output[i], 2)} * x - {b}'
 
-# The provided function
 def get_tangent_provided(f: callable, x_0: int) -> str:
+    '''Get tangent bot'''
     output = [0]
     for i in range(1, 324):
         h = 10**-i
@@ -32,19 +36,32 @@ def get_tangent_provided(f: callable, x_0: int) -> str:
             return f'{slope} * x - {b}'
     return 'The function did not converge'
 
-# Test function
-def f(x):
-    return x**2
 
-# Measure execution time
-orig_times = [timeit.timeit(lambda: get_tangent_orig(f, 1), number=n) for n in range(1, 101)]
-provided_times = [timeit.timeit(lambda: get_tangent_provided(f, 1), number=n) for n in range(1, 101)]
+def generate_random_polynomial(degree: int) -> callable:
+    coefficients = [random.randint(-10, 10) for _ in range(degree + 1)]
+    polynomial = lambda x: sum(coefficients[i] * x**i for i in range(degree + 1))
+    return polynomial
 
-# Plot results
-plt.plot(range(1, 101), orig_times, label='Original')
-plt.plot(range(1, 101), provided_times, label='Provided')
-plt.xlabel('Number of Function Calls')
-plt.ylabel('Execution Time (s)')
-plt.title('Comparison of Execution Time')
-plt.legend()
-plt.show()
+
+def memory_test():
+    input_values = [generate_random_polynomial(i) for i in range(1, 100, 5)]
+    mem_usages_1 = []
+    mem_usages_2 = []
+    for value in input_values:
+        num = random.randint(-100, 100)
+        mem_usage = memory_usage((get_tangent_orig, (value,num), {}))
+        mem_usages_1.append(mem_usage[-1])
+        mem_usage = memory_usage((get_tangent_provided, (value,num), {}))
+        mem_usages_2.append(mem_usage[-1])
+    plt.plot(range(1,100,5), mem_usages_1, label = 'human')
+    plt.plot(range(1,100,5), mem_usages_2, label = 'GitHub Copilot')
+    plt.title('Memory Usage vs. Input Value')
+    plt.xlabel('Input Value')
+    plt.ylabel('Memory Usage (MB)')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+if __name__=="__main__":
+    memory_test()
+
