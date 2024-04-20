@@ -82,10 +82,11 @@ if __name__ == "__main__":
     # print("hi")
     import time
     import matplotlib.pyplot as plt
+    from memory_profiler import memory_usage
 
     def test_execution_time():
-        execution_times_human = []
-        execution_times_github = []
+        memory_human = []
+        memory_github = []
         alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         input_values = [i for i in range(1, 2000, 100)]  # Example input values to test
 
@@ -94,21 +95,15 @@ if __name__ == "__main__":
             num_of_films = num//2
             for i in range(num):
                 dic["".join(random.choice(alphabet) for _ in range(10))] = ["".join(random.choice(alphabet) for _ in range(5) for i in range(5))]
-            start_time = time.time()
-            find_films_with_keywords_human(dic, num_of_films)
-            end_time = time.time()
-            execution_time = end_time - start_time
-            execution_times_human.append(execution_time)
+            m1 = memory_usage((find_films_with_keywords_human, (dic, num_of_films,), {}))
+            memory_human.append(m1[-1])
 
-            start_time = time.time()
-            find_films_with_keywords_github(dic, num_of_films)
-            end_time = time.time()
-            execution_time = end_time - start_time
-            execution_times_github.append(execution_time)
+            m2 = memory_usage((find_films_with_keywords_github, (dic, num_of_films,), {}))
+            memory_github.append(m2[-1])
 
 
-        plt.plot(input_values, execution_times_human, color = 'red', label = 'human')
-        plt.plot(input_values, execution_times_github, color = 'blue', label = 'bot')
+        plt.plot(input_values, memory_human, color = 'red', label = 'human')
+        plt.plot(input_values, memory_github, color = 'blue', label = 'bot')
         
         plt.xlabel('Input Value')
         plt.ylabel('Execution Time (seconds)')
